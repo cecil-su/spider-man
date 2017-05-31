@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+
+require('commander')
+  .version(require('../package.json').version)
+  .usage('<command> [options]')
+  .command('search', 'search a course')
+  .command('list', 'list the courses by the search name')
+  .command('download', 'download by the id name')
+  .parse(process.argv)

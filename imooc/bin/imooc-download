@@ -1,0 +1,76 @@
+#!/usr/bin/env node
+
+let program = require('commander')
+let logger = require('../lib/logger')
+let fs = require('fs')
+let request = require('request')
+let cheerio = require('cheerio')
+let chalk = require('chalk')
+let Multiprogress = require('multi-progress')
+multi = new Multiprogress(process.stderr)
+
+program
+  .usage('<download> [course-id]')
+
+program.on('--help', function () {
+  console.log(' Examples:')
+  console.log()
+  console.log(chalk.gray(' # download all courses by course id'))
+  console.log(' $ imooc download 259')
+  console.log()
+})
+
+function help () {
+  program.parse(process.argv)
+  if (program.args.length < 1) return program.help()
+}
+
+help()
+
+let argv = process.argv.slice(2)
+
+let words = argv[0]
+let url = 'http://www.imooc.com/learn/' + words
+request(url, function (err, res, html) {
+  if (err) return logger.error(err)
+  if (res && res.statusCode === 200) {
+    let $ = cheerio.load(res.body)
+    $('.video li').each(function () {
+      let id = $(this).attr('data-media-id')
+      let name = $(this).find('a')[0].children[2].data.replace(/(\n)+|(\r\n)+/g, "").replace(/\s/g, "")
+      console.log(name)
+      // readVideoDetailAndDownload(id, name)
+    })
+  } else {
+    return logger.error(res.statusCode)
+  }
+})
+
+const readVideoDetailAndDownload = function (id, name) {
+  const api = 'http://www.imooc.com/course/ajaxmediainfo/?mode=false&mid='
+  const url = api + id
+  var filename = name.replace(/\(\d.+$/, '').trim() + '.mp4'
+  console.log(chalk.gray(`Download course: ${filename}`))
+  request.get(url, function (err, res) {
+    if (err) return logger.error(err)
+    if (res && res.statusCode === 200) {
+      let body = JSON.parse(res.body)
+      if (body.result === 0) {
+        filename = filename.replace(/([\\\/\*\:\?\"\<\>\|])/g, '_')
+        request.get(body.data.result.mpath[0]).on('response', function (res) {
+          var len, progressBar
+          len = parseInt(res.headers['content-length'], 10)
+          progressBar = multi.newBar('Downloading ' + filename + ' [:bar] :percent :etas', {
+            width: 50,
+            total: len
+          })
+          return res.on('data', function (chunk) {
+            return progressBar.tick(chunk.length)
+          })
+        }).pipe(fs.createWriteStream(filename))
+      } else {
+        return callback(body.msg)
+      }
+    }
+  })
+}

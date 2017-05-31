@@ -1,0 +1,19 @@
+{
+  "name": "novel-spider",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "bin": {
+    "book": "./index.js"
+  },
+  "author": "cecil-su",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^2.9.0",
+    "progress": "^2.0.0"
+  }
+}

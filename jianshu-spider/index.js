@@ -9,6 +9,7 @@ var url = 'http://www.jianshu.com/'
 var notes = []
 
 function start () {
+  console.time('耗时')
   superagent.get(url)
   .end(function (err, res) {
     if (err) {
@@ -33,7 +34,7 @@ function start () {
     })
     response.write('123')
   }
-
+  console.timeEnd('耗时')
   http.createServer(onRequest).listen(3000)  
 }
 

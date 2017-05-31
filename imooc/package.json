@@ -1,0 +1,25 @@
+{
+  "name": "imooc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "bin": {
+    "imooc": "./bin/imooc",
+    "imooc-search": "./bin/imooc-search",
+    "imooc-list": "./bin/imooc-list",
+    "imooc-download": "./bin/imooc-download"
+  },
+  "author": "cecil-su",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^1.1.3",
+    "cheerio": "^1.0.0-rc.1",
+    "commander": "^2.9.0",
+    "multi-progress": "^2.0.0",
+    "request": "^2.81.0"
+  }
+}

@@ -1,0 +1,25 @@
+#!/usr/bin/env node
+
+let logger = require('../lib/logger')
+let request = require('request')
+let cheerio = require('cheerio')
+let chalk = require('chalk')
+
+let argv = process.argv.slice(2)
+
+let words = argv[0]
+let url = 'http://www.imooc.com/learn/' + words
+request(url, function (err, res, html) {
+  if (err) return logger.error(err)
+  if (res && res.statusCode === 200) {
+    let $ = cheerio.load(res.body)
+    $('.video li').each(function () {
+      // console.log(chalk.gray('> ') + chalk.blue($(this).attr('data-media-id')))
+      let name = $(this).find('a')[0].children[2].data.replace(/(\n)+|(\r\n)+/g, "").replace(/\s/g, "")
+      console.log(chalk.gray('> ') + chalk.green(name))
+      // console.log(chalk.gray('> '))
+    })
+  } else {
+    return logger.error(res.statusCode)
+  }
+})
