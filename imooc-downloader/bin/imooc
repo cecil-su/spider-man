@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+
+let program = require('commander')
+let colors = require('colors')
+
+program
+  .version(require('../package.json').version)
+  .command('search <name>')
+  .alias('s')
+  .description('Search course specified by keywords')
+  .action(function (name) {
+    console.log('search for %s', name)
+  }).on('--help', function () {
+    console.log('search help')
+  })
+
+program
+  .command('list [id]')
+  .alias('l')
+  .description('Show the Chapters and Lessons by course Id')
+  .option("-p, --page <n>", "Which exec mode to use")
+  .action(function (id, options) {
+    console.log('list %s in page %s', id, options.page)
+  })
+
+program
+  .command('download [id]')
+  .alias('d')
+  .description()
+
+program.parse(process.argv)
