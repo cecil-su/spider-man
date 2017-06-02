@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+
+let logger = require('../lib/logger')
+let request = require('request')
+let cheerio = require('cheerio')
+let chalk = require('chalk')
+
+let argv = process.argv.slice(2)
+let words = argv[0]
+let url = 'http://www.imooc.com/learn/' + words
+request(url, function (err, res, html) {
+  if (err) return logger.error(err)
+  if (res && res.statusCode === 200) {
+    let $ = cheerio.load(res.body)
+    console.time('--> 耗时')
+    console.log(chalk.green('>>>'))
+    console.log(chalk.green('+ -正在查看课程《'+ $('.course-infos .hd .l').text().trim() +'》...'))
+    $('.chapter').each(function () {
+      let chapter = $(this).find('h3 strong')[0].children[2].data.replace(/(\n)+|(\r\n)+/g, "").replace(/\s/g, "")
+      console.log(chalk.green('+ --' + chapter))
+      $(this).find('.video li').each(function () {
+        let id = $(this).attr('data-media-id')
+        let name = $(this).find('a')[0].children[2].data.replace(/(\n)+|(\r\n)+/g, "").replace(/\s/g, "")
+        console.log(chalk.green('+ ---' + name))
+      })
+    })
+    console.log(chalk.green('<<<'))
+    console.timeEnd('--> 耗时')
+  } else {
+    return logger.error(res.statusCode)
+  }
+})

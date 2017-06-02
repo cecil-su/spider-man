@@ -9,9 +9,9 @@
   "keywords": [],
   "bin": {
     "imooc": "./bin/imooc",
-    "imooc-search": "./bin/imooc-search",
-    "imooc-list": "./bin/imooc-list",
-    "imooc-download": "./bin/imooc-download"
+    "imooc-s": "./bin/imooc-s",
+    "imooc-l": "./bin/imooc-l",
+    "imooc-d": "./bin/imooc-d"
   },
   "author": "cecil-su",
   "license": "ISC",

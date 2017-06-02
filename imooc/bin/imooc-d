@@ -35,12 +35,19 @@ request(url, function (err, res, html) {
   if (err) return logger.error(err)
   if (res && res.statusCode === 200) {
     let $ = cheerio.load(res.body)
-    $('.video li').each(function () {
-      let id = $(this).attr('data-media-id')
-      let name = $(this).find('a')[0].children[2].data.replace(/(\n)+|(\r\n)+/g, "").replace(/\s/g, "")
-      console.log(name)
-      // readVideoDetailAndDownload(id, name)
+    console.log(chalk.green('>>>'))
+    console.log(chalk.green('+ -正在下载课程《'+ $('.course-infos .hd .l').text().trim() +'》...'))
+    $('.chapter').each(function () {
+      let chapter = $(this).find('h3 strong')[0].children[2].data.replace(/(\n)+|(\r\n)+/g, "").replace(/\s/g, "")
+      console.log(chalk.green('+ --' + chapter))
+      $(this).find('.video li').each(function () {
+        let id = $(this).attr('data-media-id')
+        let name = $(this).find('a')[0].children[2].data.replace(/(\n)+|(\r\n)+/g, "").replace(/\s/g, "")
+        console.log(chalk.green('+ ---' + name))
+        // readVideoDetailAndDownload(id, name)
+      })
     })
+    console.log(chalk.green('<<<'))
   } else {
     return logger.error(res.statusCode)
   }

@@ -1,0 +1,102 @@
+#!/usr/bin/env node
+
+let program = require('commander')
+let logger = require('../lib/logger')
+let request = require('request')
+let cheerio = require('cheerio')
+let chalk = require('chalk')
+
+program
+  .usage('<search> [course-name]')
+
+program.on('--help', function () {
+  console.log(' Examples:')
+  console.log()
+  console.log(chalk.gray(' # search all courses by course name'))
+  console.log(' $ imooc search node')
+  console.log(chalk.gray(' # show the list by the page number'))
+  console.log(' $ imooc search node 2')
+})
+
+function help () {
+  program.parse(process.argv)
+  if (program.args.length < 1) return program.help()
+}
+
+help()
+
+console.log()
+process.on('exit', function () {
+  console.log()
+})
+
+let argv = process.argv.slice(2)
+
+let words = argv[0]
+let page = argv[1] || 1
+let usePage = page === 1 ? false : true
+let url = 'http://www.imooc.com/search/course?words=' + words + '&page=' + page
+
+request(url, function (err, res) {
+  if (err) return logger.error(err)
+  if (res && res.statusCode === 200) {
+    let $ = cheerio.load(res.body)
+    let course = $('.course-item')
+    if (!course.length) return console.log('There is no result on ' + words + '.')
+    readCourseList(url, function (err, data, count) {
+          console.time('--> 耗时')
+          console.log(chalk.yellow('正在搜索'+ words + '相关的课程'))
+          console.log('---------------------------------------------')
+      if (Array.isArray(data)) {
+        data.forEach(function (item) {
+          console.log(chalk.green('+ id: ') + chalk.underline.bgMagenta(' ' + item.id.split('/')[2] + ' '))
+          console.log(chalk.green('+ title: ') + chalk.white(item.title))
+          // console.log(chalk.gray('> ') + chalk.gray(item.number))
+          console.log(chalk.green('+ description: ') + chalk.white(item.description))
+          console.log(chalk.green('+ url: ') + chalk.white(item.url))
+          console.log('---------------------------------------------')
+        })
+      }
+      console.log(chalk.green('>>>'))
+      if (usePage) {
+        console.log(chalk.green('+ -以上是搜索' + chalk.red(words) + '的结果,共有' + count + '页,当前在第' + page + '页,共有' + data.length + '条数据'))
+      } else {
+        console.log(chalk.green('+ -以上是搜索' + chalk.red(words) + '的结果,共有' + count + '页,共有' + data.length + '条数据'))
+      }
+      console.log(chalk.green('<<<'))
+      console.timeEnd('--> 耗时')
+    })
+  }
+})
+
+const readCourseList = function (url, callback) { 
+  request(url, function (err, res) {
+    if (err) return logger.error(err)
+    if (res && res.statusCode === 200) {
+      let $ = cheerio.load(res.body)
+      let course = $('.course-item')
+      let count = $('.text-page-tag').length || 1
+      let courses = []
+      course.each(function () {
+        return courses.push({
+          id: $(this).find('a').attr('href'),
+          title: $(this).find('.course-item-title .type').text().trim() + '-' + $(this).find('.course-item-title a').text().trim(),
+          number: $(this).find('.tag strong').text().trim(),
+          description: $(this).find('.content').text().replace(/(\n)+|(\r\n)+/g, "").replace(/\s/g, ""),
+          url: 'http://www.imooc.com' + $(this).find('a').attr('href')
+        })
+      })
+      let nextPage = $('.page').find('.active').next().attr('href')
+      if (usePage) { // 直接输出
+        return callback(null, courses, count)
+      } else {
+        if (!nextPage) return callback(null, courses, count)
+        nextPageURL = 'http://www.imooc.com' + nextPage
+        readCourseList(nextPageURL, function (err, list) {
+          if (err) return callback(err)
+          return callback(null, courses.concat(list), count)
+        })
+      }
+    }
+  })
+}
