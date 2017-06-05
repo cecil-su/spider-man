@@ -2,6 +2,9 @@
 
 let program = require('commander')
 let colors = require('colors')
+let Imooc = require('../index')
+let display = require('../lib/display')
+let imooc = new Imooc()
 
 program
   .version(require('../package.json').version)
@@ -9,18 +12,40 @@ program
   .alias('s')
   .description('Search course specified by keywords')
   .action(function (name) {
+    console.log('不建议试用此功能查找课程')
     console.log('search for %s', name)
+    imooc.getCourses(name, function (err, courses) {
+      if (err) {
+        console.error(err)
+      } else {
+        display.showCourses(courses)
+      }
+    })
   }).on('--help', function () {
     console.log('search help')
   })
 
 program
-  .command('list [id]')
+  .command('list <n>')
   .alias('l')
   .description('Show the Chapters and Lessons by course Id')
-  .option("-p, --page <n>", "Which exec mode to use")
-  .action(function (id, options) {
-    console.log('list %s in page %s', id, options.page)
+  .option('-c, --control <value>', '头部方向分类筛选')
+  .option('-t, --type <n>', '头部类型筛选')
+  .option('-s, --sort <last | pop>', '显示最新课程或者最热课程，默认最新')
+  .option('-p, --page <n>', '页码参数，显示当前页面所列课程')
+  .action(function (n, options) {
+    imooc.loopList(n, options, function (err, res) {
+      if (err) {
+        console.error(err)
+      } else {
+        display.showCoursesControl(res.top)
+      }
+    })
+  }).on('--help', function () {
+    console.log(' 默认参数：[course, class, code, wenda, article]')
+    console.log()
+    console.log(' $ imooc list course')
+    console.log()
   })
 
 program

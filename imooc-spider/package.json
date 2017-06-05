@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "cecil-su",
   "license": "ISC",
   "dependencies": {
     "cheerio": "^0.22.0",
